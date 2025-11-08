@@ -10,12 +10,22 @@ public class ClientUDP {
 
         System.out.print("Entrez votre nom d'utilisateur : ");
         String username = sc.nextLine();
+        Thread receiveThread = new Thread(() -> {
+            try {
+                byte[] buffer = new byte[1024];
+                while (true) {
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+                    String msg = new String(packet.getData(), 0, packet.getLength());
+                    System.out.println(msg);
+                }
+            } catch (Exception e) {}
+        });
 
+        receiveThread.start();
         while (true) {
-            System.out.print("Message : ");
             String message = "[" + username + "] : " + sc.nextLine();
             byte[] data = message.getBytes();
-
             DatagramPacket paquet = new DatagramPacket(data, data.length, serverAddress, 1234);
             socket.send(paquet);
         }
